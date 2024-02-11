@@ -31,8 +31,11 @@ def compare_files(file1: str, file2: str) -> None:
             f1_line = f1.readline()
             f2_line = f2.readline()
             if f1_line != f2_line:
-                print(f"Files do not match at line {f1.tell()}")
+                print(f"Files do not match at line:\n{f1_line}\n{f2_line}")
                 break
+        if f1_line or f2_line:
+            print(f"Files do not match. Leftover lines:\n{f1_line}\n{f2_line}")
+            return
         print(f"There files are identical.")
 
 
