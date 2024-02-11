@@ -13,23 +13,53 @@ class MergeSortedFiles:
             f1.readline()
             f2.readline()
             f3.write("ID,Sentence\n")
-            f1_line = f1.readline()
-            f2_line = f2.readline()
-            while f1_line and f2_line:
-                f1_id, f1_sentence = f1_line.strip().split(",")
-                f2_id, f2_sentence = f2_line.strip().split(",")
+
+            def read_chunk(file, prev_remainder="", chunk_size=10 * 1024 * 1024):  # Chunk size is set to 10 MB
+                data = file.read(chunk_size)
+                lines = data.split("\n")
+                if prev_remainder:
+                    lines[0] = prev_remainder + lines[0]
+                remainder = lines.pop()
+                return lines, remainder
+
+            f1_chunk, f1_remainder = read_chunk(f1)
+            f2_chunk, f2_remainder = read_chunk(f2)
+
+            i = j = 0
+            f1_id, f1_sentence = f1_chunk[i].split(",")
+            f2_id, f2_sentence = f2_chunk[j].split(",")
+            while f1_chunk and f2_chunk:
                 if int(f1_id) < int(f2_id):
+                    if i == len(f1_chunk) - 1:
+                        f1_chunk, f1_remainder = read_chunk(f1, f1_remainder)
+                        i = -1
                     f3.write(f"{f1_id},{f1_sentence}\n")
-                    f1_line = f1.readline()
+                    i += 1
+                    if not f1_chunk: break
+                    f1_id, f1_sentence = f1_chunk[i].split(",")
                 else:
+                    if j == len(f2_chunk) - 1:
+                        f2_chunk, f2_remainder = read_chunk(f2, f2_remainder)
+                        j = -1
                     f3.write(f"{f2_id},{f2_sentence}\n")
-                    f2_line = f2.readline()
-            while f1_line:
-                f3.write(f1_line)
-                f1_line = f1.readline()
-            while f2_line:
-                f3.write(f2_line)
-                f2_line = f2.readline()
+                    j += 1
+                    if not f2_chunk: break
+                    f2_id, f2_sentence = f2_chunk[j].split(",")
+
+            while i < len(f1_chunk):
+                f3.write(f1_chunk[i] + "\n")
+                i += 1
+                if not f1_chunk:
+                    f1_chunk, f1_remainder = read_chunk(f1)
+                    i = -1
+
+            while j < len(f2_chunk):
+                f3.write(f2_chunk[j] + "\n")
+                j += 1
+                if not f2_chunk:
+                    f2_chunk, f2_remainder = read_chunk(f2)
+                    j = -1
+
         print(f"Sorted files ({get_file_size(self.first)}, {get_file_size(self.second)}) merged while sorting into {get_file_size(self.merged)}")
 
 
