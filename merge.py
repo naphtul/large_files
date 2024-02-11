@@ -1,9 +1,15 @@
+from utils import timer, get_file_size
+
+
 class MergeSortedFiles:
     def __init__(self):
-        self.file_name = "merged.csv"
+        self.first = "first.csv"
+        self.second = "second.csv"
+        self.merged = "merged.csv"
 
+    @timer
     def merge_files(self):
-        with open("first.csv", "r") as f1, open("second.csv", "r") as f2, open(self.file_name, "w") as f3:
+        with open(self.first, "r") as f1, open(self.second, "r") as f2, open(self.merged, "w") as f3:
             f1.readline()
             f2.readline()
             f3.write("ID,Sentence\n")
@@ -24,7 +30,7 @@ class MergeSortedFiles:
             while f2_line:
                 f3.write(f2_line)
                 f2_line = f2.readline()
-        print(f"Files merged into {self.file_name}")
+        print(f"Sorted files ({get_file_size(self.first)}, {get_file_size(self.second)}) merged while sorting into {get_file_size(self.merged)}")
 
 
 if __name__ == "__main__":
